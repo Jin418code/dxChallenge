@@ -13,14 +13,14 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class StockInStoreDto {
+public class BannerDto {
 
 	
 	private Long stock_id;
 	private String food_nm ;
 	private String photo_link ;
 	private int original_price ;
-	private int  quanity;
+	private int quanity;
 	private int saled_price;
 	private String expiration_date;
 	
@@ -40,8 +40,12 @@ public class StockInStoreDto {
     private float nat ;
     
     private int market_price;
+    
+    
+    //무슨 배너인지 구분
+    private String banner_code;
 	
-	public StockInStoreDto(Food food, Stock stock, Store store, Calorie calorie, int market_price) {
+	public BannerDto(Food food, Stock stock, Store store, Calorie calorie, String banner_code, int market_price) {
 		
 		this.food_nm = food.getFood_nm();
 		this.photo_link = food.getPhoto_link();
@@ -65,6 +69,8 @@ public class StockInStoreDto {
 		this.car = calorie.getCar();
 		this.fat = calorie.getFat();
 		this.nat = calorie.getNat();
+		
+		this.banner_code = banner_code;
 		
 		this.market_price = market_price;
 	}
@@ -108,4 +114,6 @@ public class StockInStoreDto {
 		
 		
 	}
+	
+	
 }

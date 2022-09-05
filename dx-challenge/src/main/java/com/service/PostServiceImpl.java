@@ -23,6 +23,10 @@ import com.domain.jpa.CalorieRepository;
 import com.domain.jpa.CodeNm;
 import com.domain.jpa.Food;
 import com.domain.jpa.FoodRepository;
+import com.domain.jpa.MarketPrice;
+import com.domain.jpa.MarketPriceRepository;
+import com.domain.jpa.SeasonFood;
+import com.domain.jpa.SeasonFoodRepository;
 import com.domain.jpa.Stock;
 import com.domain.jpa.StockRepository;
 import com.domain.jpa.Store;
@@ -41,6 +45,8 @@ public class PostServiceImpl implements PostService {
 	private StockRepository stockRepository;
 	private FoodRepository foodRepository;
 	private CalorieRepository calorieRepository;
+	private SeasonFoodRepository seasonRepository;
+	private MarketPriceRepository marketRepository;
 	
 	@Autowired
 	public void setUserRepository(StoreRepository userRepository) {
@@ -66,6 +72,15 @@ public class PostServiceImpl implements PostService {
 	public void setCalorieRepository(CalorieRepository calorieRepository) {
 	    this.calorieRepository = calorieRepository;
 	 }
+	@Autowired
+	public void setSeasonFoodRepository(SeasonFoodRepository seasonRepository) {
+		this.seasonRepository = seasonRepository ;
+	}
+	@Autowired
+	public void setMarketPriceRepository(MarketPriceRepository marketRepository) {
+		this.marketRepository = marketRepository ;
+	}	
+	
 	
 	@Transactional
     //모든 상점 기본 정보 출략
@@ -301,11 +316,73 @@ public class PostServiceImpl implements PostService {
 		List<Food> foodLlist = foodRepository.findAll();
 		List<Stock> stockList = stockRepository.findAll();
 		List<Calorie> calorieList = calorieRepository.findAll();
+		List<MarketPrice> marketPriceList = marketRepository.findAll();
 		
 		
 		HashMap<Long, Food> food = new HashMap<Long, Food>();
 		HashMap<Long, Store> store = new HashMap<Long, Store>();
 		HashMap<Long, Calorie> calorie = new HashMap<Long, Calorie>();
+		HashMap<Long, MarketPrice> marketPrice = new HashMap<Long, MarketPrice >();
+		for(Food f : foodLlist) 
+			food.put(f.getId(), f);
+
+		for(Store s : storeList) 
+			store.put(s.getId(), s);
+		
+		for(Calorie c : calorieList )
+			calorie.put(c.getId(), c);
+		
+		for(MarketPrice m : marketPriceList)
+			marketPrice.put(m.getFood_id(), m);
+		
+		for(Stock s : stockList) {
+			
+			int price = 0;
+			Food temp = food.get(s.getFood_id());
+			if(marketPrice.containsKey(temp.getId()))
+				price = marketPrice.get(temp.getId()).getMarket_price();
+			return_list.add(new StockInStoreDto(temp ,s , store.get(s.getStore_id()), calorie.get(temp.getCalorie_id()), price  ));
+			
+		}
+		
+		return return_list;
+
+
+	}
+	
+	
+	// 배너 광고 정보 출력
+	@Transactional
+	public List<StockInStoreDto> findSeaonAndWeather() {
+		
+		List<StockInStoreDto> returnList = new ArrayList<StockInStoreDto>();
+		
+		List<Stock> stockList = new ArrayList<Stock>();
+		
+		List<SeasonFood> seasonList = seasonRepository.findAll();
+		
+		
+		for(SeasonFood s : seasonList ) {
+			
+			List<Stock> temp = stockRepository.findStockByFoodId(s.getFood_id());
+			
+			if(!temp.isEmpty())
+				stockList.addAll(temp);
+			
+		}
+		
+		List<Store> storeList = storeRepository.findAll();
+		List<Food> foodLlist = foodRepository.findAll();
+		List<Calorie> calorieList = calorieRepository.findAll();
+		List<MarketPrice> marketPriceList = marketRepository.findAll();
+		
+		
+		HashMap<Long, Food> food = new HashMap<Long, Food>();
+		HashMap<Long, Store> store = new HashMap<Long, Store>();
+		HashMap<Long, Calorie> calorie = new HashMap<Long, Calorie>();
+		HashMap<Long, MarketPrice> marketPrice = new HashMap<Long, MarketPrice >();
+		
+		
 		
 		for(Food f : foodLlist) 
 			food.put(f.getId(), f);
@@ -316,19 +393,27 @@ public class PostServiceImpl implements PostService {
 		for(Calorie c : calorieList )
 			calorie.put(c.getId(), c);
 		
+		for(MarketPrice m : marketPriceList)
+			marketPrice.put(m.getFood_id(), m);
+		
 		for(Stock s : stockList) {
 			
-
+			
+			int price = 0;
 			Food temp = food.get(s.getFood_id());
-			return_list.add(new StockInStoreDto(temp ,s , store.get(s.getStore_id()), calorie.get(temp.getCalorie_id())));
+			if(marketPrice.containsKey(temp.getId()))
+				price = marketPrice.get(temp.getId()).getMarket_price();
+				
+			returnList.add(new StockInStoreDto(temp ,s , store.get(s.getStore_id()), calorie.get(temp.getCalorie_id()), price) );
 			
 		}
 		
-		return return_list;
 
-
+		
+		return returnList;
+		
+		
 	}
-	
 
 	
 }

@@ -1,12 +1,17 @@
 package com.api;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +20,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.api.dto.BannerDto;
 import com.api.dto.KeyWordDto;
 import com.api.dto.PurchaseDto;
 import com.api.dto.StockDto;
@@ -22,9 +28,11 @@ import com.api.dto.StockInStoreDto;
 import com.api.dto.StoreAndStockDto;
 import com.api.dto.StoreDto;
 import com.domain.jpa.Store;
+import com.service.BannerService;
 import com.service.PostService;
 
 import lombok.RequiredArgsConstructor;
+
 
 
 @RequiredArgsConstructor
@@ -33,6 +41,8 @@ import lombok.RequiredArgsConstructor;
 public class PostsApiController {
 
 	private final PostService postService;
+	
+	private final BannerService bannerService;
 
 
 
@@ -97,5 +107,33 @@ public class PostsApiController {
     public List<StockInStoreDto> findStockInStore() {
     	return postService.findStockInStore();
     }
+    
+    @GetMapping("/bannertest")
+    public List<StockInStoreDto> findSeaonAndWeather() {
+    	return postService.findSeaonAndWeather();
+    }
+    
+    @GetMapping("/test")
+    public void bringWeatherInfo() throws IOException, ParseException {
+    	bannerService.bringWeatherInfo();
+    }
+    
+    @GetMapping("/banner")
+    public List<BannerDto> bringBannerInfo()  {
+    	return bannerService.findSeaonAndWeather();
+    }
+    
+  //스케줄러로 1초마다 gaming 및 블록 렌딩을 호출하여 게임상태 점검
+  	@Scheduled(cron = "0 0/20 * * * ?")
+  	private void gameCheck() throws IOException, ParseException {
+  		
+  		
+  		
+  		bannerService.bringWeatherInfo();
+  		
+  		
+
+  	}	
+    
 
 }
